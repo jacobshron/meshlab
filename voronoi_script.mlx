@@ -1,0 +1,49 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+ <filter name="Poisson-disk Sampling">
+  <Param name="SampleNum" type="RichInt" value="150" description="Number of samples" tooltip="The desired number of samples. The ray of the disk is calculated according to the sampling density."/>
+  <Param name="Radius" type="RichAbsPerc" value="0" max="3.54882" description="Explicit Radius" tooltip="If not zero this parameter override the previous parameter to allow exact radius specification" min="0"/>
+  <Param name="MontecarloRate" type="RichInt" value="20" description="MonterCarlo OverSampling" tooltip="The over-sampling rate that is used to generate the initial Montecarlo samples (e.g. if this parameter is &lt;i>K&lt;/i> means that&lt;i>K&lt;/i> x &lt;i>poisson sample&lt;/i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate."/>
+  <Param name="SaveMontecarlo" type="RichBool" value="false" description="Save Montecarlo" tooltip="If true, it will generate an additional Layer with the montecarlo sampling that was pruned to build the poisson distribution."/>
+  <Param name="ApproximateGeodesicDistance" type="RichBool" value="false" description="Approximate Geodesic Distance" tooltip="If true Poisson Disc distances are computed using an approximate geodesic distance, e.g. an euclidean distance weighted by a function of the difference between the normals of the two points."/>
+  <Param name="Subsample" type="RichBool" value="false" description="Base Mesh Subsampling" tooltip="If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.&lt;br>Note that this option is very useful in the case you want to subsample a dense point cloud."/>
+  <Param name="RefineFlag" type="RichBool" value="false" description="Refine Existing Samples" tooltip="If true the vertices of the below mesh are used as starting vertices, and they will utterly refined by adding more and more points until possible. "/>
+  <Param name="RefineMesh" type="RichMesh" value="0" description="Samples to be refined" tooltip="Used only if the above option is checked. "/>
+  <Param name="BestSampleFlag" type="RichBool" value="true" description="Best Sample Heuristic" tooltip="If true it will use a simple heuristic for choosing the samples. At a small cost (it can slow a bit the process) it usually improve the maximality of the generated sampling. "/>
+  <Param name="BestSamplePool" type="RichInt" value="10" description="Best Sample Pool Size" tooltip="Used only if the Best Sample Flag is true. It control the number of attempt that it makes to get the best sample. It is reasonable that it is smaller than the Montecarlo oversampling factor."/>
+  <Param name="ExactNumFlag" type="RichBool" value="false" description="Precise sample number" tooltip="If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with the below specified tolerance. Obviously it will takes much longer."/>
+  <Param name="ExactNumTolerance" type="RichFloat" value="0.005" description="Precise sample number tolerance" tooltip="If a precise number of sample is requested, the sample number will be matched with the precision specified here. Precision is specified as a fraction of the sample number. so for example a precision of 0.005 over 1000 samples means that you can get 995 or 1005 samples."/>
+  <Param name="RadiusVariance" type="RichFloat" value="1" description="Radius Variance" tooltip="The radius of the disk is allowed to vary between r and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling"/>
+ </filter>
+ <filter name="Voronoi Vertex Coloring">
+  <Param name="ColoredMesh" type="RichMesh" value="0" description="To be Colored Mesh" tooltip="The mesh whose surface is colored. For each vertex of this mesh we decide the color according the below parameters."/>
+  <Param name="VertexMesh" type="RichMesh" value="1" description="Vertex Mesh" tooltip="The mesh whose vertices are used as seed points for the color computation. These seeds point are projected onto the above mesh."/>
+  <Param name="backward" type="RichBool" value="true" description="BackDistance" tooltip="If true the mesh is colored according the distance from the frontier of the voonoi diagram induced by the VertexMesh seeds."/>
+ </filter>
+ <filter name="Select by Vertex Quality">
+  <Param name="minQ" type="RichDynamicFloat" value="0.009397" max="0.134248" description="Min Quality" tooltip="Minimum acceptable quality value" min="0"/>
+  <Param name="maxQ" type="RichDynamicFloat" value="0.134248" max="0.134248" description="Max Quality" tooltip="Maximum acceptable quality value" min="0"/>
+  <Param name="Inclusive" type="RichBool" value="true" description="Inclusive Face Sel." tooltip="If true only the faces with &lt;b>all&lt;/b> the vertices within the specified range are selected. Otherwise any face with at least one vertex within the range is selected."/>
+ </filter>
+ <filter name="Delete Selected Vertices"/>
+ <filter name="Laplacian Smooth">
+  <Param name="stepSmoothNum" type="RichInt" value="1" description="Smoothing steps" tooltip="The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."/>
+  <Param name="Boundary" type="RichBool" value="true" description="1D Boundary Smoothing" tooltip="Smooth boundary edges only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). This can reduce the shrinking on the border but can have strange effects on very small boundaries."/>
+  <Param name="cotangentWeight" type="RichBool" value="true" description="Cotangent weighting" tooltip="Use cotangent weighting scheme for the averaging of the position. Otherwise the simpler umbrella scheme (1 if the edge is present) is used."/>
+  <Param name="Selected" type="RichBool" value="false" description="Affect only selection" tooltip="If checked the filter is performed only on the selected area"/>
+ </filter>
+ <filter name="Uniform Mesh Resampling">
+  <Param name="CellSize" type="RichAbsPerc" value="0.007014" max="3.5072" description="Precision" tooltip="Size of the cell, the default is 1/50 of the box diag. Smaller cells give better precision at a higher computational cost. Remember that halving the cell size means that you build a volume 8 times larger." min="0"/>
+  <Param name="Offset" type="RichAbsPerc" value="0.042086" max="0.70144" description="Offset" tooltip="Offset of the created surface (i.e. distance of the created surface from the original one).&lt;br>If offset is zero, the created surface passes on the original mesh itself. Values greater than zero mean an external surface, and lower than zero mean an internal surface.&lt;br> In practice this value is the threshold passed to the Marching Cube algorithm to extract the isosurface from the distance field representation." min="-0.70144"/>
+  <Param name="mergeCloseVert" type="RichBool" value="true" description="Clean Vertices" tooltip="If true the mesh generated by MC will be cleaned by unifying vertices that are almost coincident"/>
+  <Param name="discretize" type="RichBool" value="false" description="Discretize" tooltip="If true the position of the intersected edge of the marching cube grid is not computed by linear interpolation, but it is placed in fixed middle position. As a consequence the resampled object will look severely aliased by a stairstep appearance.&lt;br>Useful only for simulating the output of 3D printing devices."/>
+  <Param name="multisample" type="RichBool" value="true" description="Multi-sample" tooltip="If true the distance field is more accurately compute by multisampling the volume (7 sample for each voxel). Much slower but less artifacts."/>
+  <Param name="absDist" type="RichBool" value="true" description="Absolute Distance" tooltip="If true a &lt;b> not&lt;/b> signed distance field is computed. In this case you have to choose a not zero Offset and a double surface is built around the original surface, inside and outside. Is useful to convert thin floating surfaces into &lt;i> solid, thick meshes.&lt;/i>. t"/>
+ </filter>
+ <filter name="Laplacian Smooth">
+  <Param name="stepSmoothNum" type="RichInt" value="50" description="Smoothing steps" tooltip="The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."/>
+  <Param name="Boundary" type="RichBool" value="true" description="1D Boundary Smoothing" tooltip="Smooth boundary edges only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). This can reduce the shrinking on the border but can have strange effects on very small boundaries."/>
+  <Param name="cotangentWeight" type="RichBool" value="false" description="Cotangent weighting" tooltip="Use cotangent weighting scheme for the averaging of the position. Otherwise the simpler umbrella scheme (1 if the edge is present) is used."/>
+  <Param name="Selected" type="RichBool" value="false" description="Affect only selection" tooltip="If checked the filter is performed only on the selected area"/>
+ </filter>
+</FilterScript>
