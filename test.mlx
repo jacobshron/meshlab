@@ -1,0 +1,23 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+ <filter name="Poisson-disk Sampling">
+  <Param tooltip="The desired number of samples. The ray of the disk is calculated according to the sampling density." description="Number of samples" type="RichInt" value="150" name="SampleNum"/>
+  <Param tooltip="If not zero this parameter override the previous parameter to allow exact radius specification" min="0" description="Explicit Radius" type="RichAbsPerc" value="0" max="3.12138" name="Radius"/>
+  <Param tooltip="The over-sampling rate that is used to generate the initial Montecarlo samples (e.g. if this parameter is &lt;i>K&lt;/i> means that&lt;i>K&lt;/i> x &lt;i>poisson sample&lt;/i> points will be used). The generated Poisson-disk samples are a subset of these initial Montecarlo samples. Larger this number slows the process but make it a bit more accurate." description="MonterCarlo OverSampling" type="RichInt" value="20" name="MontecarloRate"/>
+  <Param tooltip="If true, it will generate an additional Layer with the montecarlo sampling that was pruned to build the poisson distribution." description="Save Montecarlo" type="RichBool" value="false" name="SaveMontecarlo"/>
+  <Param tooltip="If true Poisson Disc distances are computed using an approximate geodesic distance, e.g. an euclidean distance weighted by a function of the difference between the normals of the two points." description="Approximate Geodesic Distance" type="RichBool" value="false" name="ApproximateGeodesicDistance"/>
+  <Param tooltip="If true the original vertices of the base mesh are used as base set of points. In this case the SampleNum should be obviously much smaller than the original vertex number.&lt;br>Note that this option is very useful in the case you want to subsample a dense point cloud." description="Base Mesh Subsampling" type="RichBool" value="false" name="Subsample"/>
+  <Param tooltip="If true the vertices of the below mesh are used as starting vertices, and they will utterly refined by adding more and more points until possible. " description="Refine Existing Samples" type="RichBool" value="false" name="RefineFlag"/>
+  <Param tooltip="Used only if the above option is checked. " description="Samples to be refined" type="RichMesh" value="0" name="RefineMesh"/>
+  <Param tooltip="If true it will use a simple heuristic for choosing the samples. At a small cost (it can slow a bit the process) it usually improve the maximality of the generated sampling. " description="Best Sample Heuristic" type="RichBool" value="true" name="BestSampleFlag"/>
+  <Param tooltip="Used only if the Best Sample Flag is true. It control the number of attempt that it makes to get the best sample. It is reasonable that it is smaller than the Montecarlo oversampling factor." description="Best Sample Pool Size" type="RichInt" value="10" name="BestSamplePool"/>
+  <Param tooltip="If requested it will try to do a dicotomic search for the best poisson disk radius that will generate the requested number of samples with the below specified tolerance. Obviously it will takes much longer." description="Precise sample number" type="RichBool" value="false" name="ExactNumFlag"/>
+  <Param tooltip="If a precise number of sample is requested, the sample number will be matched with the precision specified here. Precision is specified as a fraction of the sample number. so for example a precision of 0.005 over 1000 samples means that you can get 995 or 1005 samples." description="Precise sample number tolerance" type="RichFloat" value="0.005" name="ExactNumTolerance"/>
+  <Param tooltip="The radius of the disk is allowed to vary between r and r*var. If this parameter is 1 the sampling is the same of the Poisson Disk Sampling" description="Radius Variance" type="RichFloat" value="1" name="RadiusVariance"/>
+ </filter>
+ <filter name="Voronoi Vertex Coloring">
+  <Param tooltip="The mesh whose surface is colored. For each vertex of this mesh we decide the color according the below parameters." description="To be Colored Mesh" type="RichMesh" value="0" name="ColoredMesh"/>
+  <Param tooltip="The mesh whose vertices are used as seed points for the color computation. These seeds point are projected onto the above mesh." description="Vertex Mesh" type="RichMesh" value="1" name="VertexMesh"/>
+  <Param tooltip="If true the mesh is colored according the distance from the frontier of the voonoi diagram induced by the VertexMesh seeds." description="BackDistance" type="RichBool" value="true" name="backward"/>
+ </filter>
+</FilterScript>

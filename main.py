@@ -5,7 +5,7 @@ def processFile(input_file, output_file):
     ms.load_new_mesh(input_file)
     print(f"Loaded {input_file}")
 
-    ms.load_filter_script('voronoi_script.mlx')
+    ms.load_filter_script('test.mlx')
     ms.apply_filter_script()
 
     ms.save_current_mesh(output_file)
