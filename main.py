@@ -1,6 +1,7 @@
 import pymeshlab
 import numpy as np
 from scipy.spatial import Voronoi
+from scipy.spatial import Delaunay
 
 def processFile(input_file, output_file):
     ms = pymeshlab.MeshSet()
@@ -13,23 +14,24 @@ def processFile(input_file, output_file):
 
     vor = Voronoi(vertices)
 
-    # Save Voronoi edges as an OBJ file
+    # Perform Delaunay triangulation to generate faces
+    tri = Delaunay(vertices)
+
     with open("voronoi.obj", "w") as f:
         # Write vertices
         for v in vor.vertices:
             f.write(f"v {v[0]} {v[1]} {v[2]}\n")
 
-        # Write edges as faces (for visualization)
-        for edge in vor.ridge_vertices:
-            if -1 not in edge:  # Ignore infinite edges
-                f.write(f"l {edge[0]+1} {edge[1]+1}\n")  # 'l' defines a line in OBJ
+        # Write faces from Delaunay triangulation
+        for simplex in tri.simplices:
+            f.write(f"f {simplex[0]+1} {simplex[1]+1} {simplex[2]+1}\n")  # OBJ indexing starts from 1
 
     # Load the generated Voronoi structure
     ms.load_new_mesh("voronoi.obj")
 
     # Apply filters (e.g., thickening, smoothing)
-    ms.apply_filter("simplify_quadric_edge_collapse_decimation", targetfacenum=5000)  # Simplify the mesh
-    ms.apply_filter("remove_isolated_pairs")  # Remove isolated edges or vertices
+    ms.apply_filter("meshing_decimation_quadric_edge_collapse", targetfacenum=5000)  # Simplify the mesh
+    ms.apply_filter("meshing_remove_connected_component_by_face_number", mincomponentsize=10)  # Remove isolated edges or vertices
     ms.apply_filter("smooth_laplacian", iterations=10)  # Smooth the mesh to improve appearance
 
     ms.save_current_mesh(output_file)
